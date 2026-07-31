@@ -1,8 +1,8 @@
-/* Global Reset & Typography */
+/* Page Setup & Styling */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f7f6;
-    color: #333333;
+    background-color: #1a1a2e; /* Dark gaming aesthetic background */
+    color: #ffffff;
     margin: 0;
     padding: 0;
     display: flex;
@@ -11,49 +11,36 @@ body {
     min-height: 100vh;
 }
 
-/* Header Styling */
 header {
-    background-color: #2c3e50;
-    color: #ffffff;
-    width: 100%;
     text-align: center;
-    padding: 2rem 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem 1rem;
 }
 
 header h1 {
     margin: 0;
-    font-size: 2.2rem;
+    color: #00fff0; /* Neon cyan title */
+    text-shadow: 0 0 10px rgba(0, 255, 240, 0.5);
 }
 
-/* Main Content & Card Container */
-main {
-    max-width: 600px;
-    width: 90%;
-    margin-top: 2rem;
+/* Container to center and style the game screen */
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
 }
 
-.card {
-    background-color: #ffffff;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    text-align: center;
-}
-
-/* Interactive Button Styling */
-button {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    border-radius: 6px;
+/* Styling the Canvas Game Board */
+#gameCanvas {
+    background-color: #0f3460; /* Dark blue arcade background */
+    border: 4px solid #00fff0; /* Glowing neon border */
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 255, 240, 0.3);
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-button:hover {
-    background-color: #2980b9;
-    transform: translateY(-2px);
+.controls-hint {
+    margin-top: 1rem;
+    color: #e94560;
+    font-weight: bold;
 }
