@@ -3,79 +3,76 @@ window.addEventListener('load', () => {
     const ctx = canvas.getContext('2d');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
-    const modeDisplay = document.getElementById('modeDisplay');
 
-    // Engine Setup
+    // Canvas & World Constants
     const CANVAS_WIDTH = 800;
     const CANVAS_HEIGHT = 400;
-    const GROUND_Y = 330;
-    const CEILING_Y = 50;
-    const LEVEL_LENGTH = 14000;
+    const GROUND_Y = 320;
+    const LEVEL_LENGTH = 12000; // Total level distance in pixels
 
+    // Engine Variables
     let gameSpeed = 7.5;
     let distanceTraveled = 0;
     let gameOver = false;
     let victory = false;
     let holdingJump = false;
+
+    // Background Color Pulse (RobTop GD style effect)
     let bgHue = 200;
 
-    // Player Object
+    // Player Cube Object
     const player = {
         x: 120,
-        y: GROUND_Y - 35,
-        size: 35,
+        y: GROUND_Y - 40,
+        size: 40,
         dy: 0,
-        mode: 'cube',      // 'cube', 'ship', or 'ball'
-        gravity: 0.9,
-        gravityDir: 1,     // 1 for down, -1 for inverted ceiling (Ball mode)
-        jumpForce: -13.5,
+        gravity: 0.95,
+        jumpForce: -14.2,
         isGrounded: true,
         rotation: 0
     };
 
+    // Particle Trail Array
     let particles = [];
 
-    // Obstacles & Portals Map
-    // Types: 1=Spike, 2=Block, 10=Ship Portal (Magenta), 11=Ball Portal (Orange), 12=Cube Portal (Green)
+    // Obstacle Map (1 = Spike, 2 = Block, 3 = Spike on Block)
     const levelMap = [
-        { x: 600, type: 1 },
-        { x: 900, type: 1 },
-        { x: 1200, type: 10 }, // --- SHIP PORTAL ---
-        { x: 1600, type: 1 },
-        { x: 1800, type: 2, y: 200 },
-        { x: 2200, type: 1 },
-        { x: 2500, type: 11 }, // --- BALL PORTAL ---
-        { x: 2900, type: 1 },
-        { x: 3300, type: 1 },
-        { x: 3700, type: 12 }, // --- CUBE PORTAL ---
-        { x: 4200, type: 2, y: GROUND_Y - 40 },
-        { x: 4700, type: 10 }, // --- SHIP PORTAL ---
-        { x: 5200, type: 1 },
-        { x: 5800, type: 11 }, // --- BALL PORTAL ---
-        { x: 6400, type: 1 },
-        { x: 7000, type: 12 }  // --- CUBE PORTAL ---
+        { x: 700, type: 1 },
+        { x: 1100, type: 1 },
+        { x: 1400, type: 2 },
+        { x: 1700, type: 1 },
+        { x: 2100, type: 3 },
+        { x: 2600, type: 1 },
+        { x: 2700, type: 1 },
+        { x: 3200, type: 2 },
+        { x: 3240, type: 2 },
+        { x: 3700, type: 3 },
+        { x: 4200, type: 1 },
+        { x: 4250, type: 1 },
+        { x: 4300, type: 1 },
+        { x: 4900, type: 2 },
+        { x: 5400, type: 3 },
+        { x: 6000, type: 1 },
+        { x: 6600, type: 2 },
+        { x: 7200, type: 3 },
+        { x: 8000, type: 1 },
+        { x: 8800, type: 3 },
+        { x: 9600, type: 1 },
+        { x: 9650, type: 1 },
+        { x: 10500, type: 3 }
     ];
 
     let activeObstacles = [...levelMap];
 
-    // Interaction Trigger
+    // Jump Logic
     function handleJump() {
         if (gameOver || victory) {
             restartGame();
             return;
         }
-
-        if (player.mode === 'cube') {
-            if (player.isGrounded) {
-                player.dy = player.jumpForce;
-                player.isGrounded = false;
-            }
-        } else if (player.mode === 'ball') {
-            if (player.isGrounded) {
-                // Flip gravity upside down or back right-side up!
-                player.gravityDir *= -1;
-                player.isGrounded = false;
-            }
+        if (player.isGrounded) {
+            player.dy = player.jumpForce;
+            player.isGrounded = false;
         }
     }
 
@@ -83,51 +80,40 @@ window.addEventListener('load', () => {
         distanceTraveled = 0;
         gameOver = false;
         victory = false;
-        player.mode = 'cube';
-        player.gravityDir = 1;
         player.y = GROUND_Y - player.size;
         player.dy = 0;
         player.isGrounded = true;
         player.rotation = 0;
         activeObstacles = JSON.parse(JSON.stringify(levelMap));
         particles = [];
-        updateModeUI();
         requestAnimationFrame(gameLoop);
     }
 
-    function updateModeUI() {
-        modeDisplay.innerText = player.mode.toUpperCase();
-        if (player.mode === 'cube') modeDisplay.style.color = '#a6ff00';
-        if (player.mode === 'ship') modeDisplay.style.color = '#ff00ff';
-        if (player.mode === 'ball') modeDisplay.style.color = '#ff8800';
-    }
-
-    // Input Listeners
+    // Input Handling (Supports Hold-to-Jump)
     window.addEventListener('keydown', (e) => {
         if (e.code === 'Space' || e.code === 'ArrowUp') {
             e.preventDefault();
-            if (!holdingJump) handleJump();
             holdingJump = true;
+            handleJump();
         }
     });
 
     window.addEventListener('keyup', (e) => {
-        if (e.code === 'Space' || e.code === 'ArrowUp') holdingJump = false;
+        if (e.code === 'Space' || e.code === 'ArrowUp') {
+            holdingJump = false;
+        }
     });
 
-    canvas.addEventListener('mousedown', () => {
-        if (!holdingJump) handleJump();
-        holdingJump = true;
-    });
-    canvas.addEventListener('mouseup', () => holdingJump = false);
+    canvas.addEventListener('mousedown', () => { holdingJump = true; handleJump(); });
+    canvas.addEventListener('mouseup', () => { holdingJump = false; });
 
-    // Particle Trail Engine
+    // Spawn Particles Behind Player
     function createParticle() {
         particles.push({
             x: player.x,
-            y: player.y + player.size / 2,
-            size: Math.random() * 5 + 2,
-            speedX: -gameSpeed * 0.4,
+            y: player.y + player.size - 5,
+            size: Math.random() * 6 + 2,
+            speedX: -gameSpeed * 0.5,
             speedY: (Math.random() - 0.5) * 2,
             life: 1.0
         });
@@ -137,103 +123,66 @@ window.addEventListener('load', () => {
     function gameLoop() {
         if (gameOver || victory) return;
 
+        // 1. UPDATE PHYSICS
         distanceTraveled += gameSpeed;
 
-        // 1. GAMEMODE PHYSICS ENGINES
-        if (player.mode === 'ship') {
-            // Ship flying physics: Holding jump rockets up, releasing drops down
-            if (holdingJump) {
-                player.dy -= 0.65; // Thrust upward
-            } else {
-                player.dy += 0.55; // Gravity pull down
-            }
-            player.dy = Math.max(-8, Math.min(8, player.dy)); // Terminal velocity limit
-            player.y += player.dy;
-
-            // Pitch ship nose based on speed
-            player.rotation = player.dy * 4;
-
-            // Roof and Floor Bounds for Ship
-            if (player.y <= CEILING_Y) {
-                player.y = CEILING_Y;
-                player.dy = 0;
-            }
-            if (player.y >= GROUND_Y - player.size) {
-                player.y = GROUND_Y - player.size;
-                player.dy = 0;
-            }
-            createParticle();
-
-        } else if (player.mode === 'ball') {
-            // Ball Gravity-Flip Physics
-            player.dy += player.gravity * 0.8 * player.gravityDir;
-            player.y += player.dy;
-
-            // Bottom Ground Collision
-            if (player.gravityDir === 1 && player.y >= GROUND_Y - player.size) {
-                player.y = GROUND_Y - player.size;
-                player.dy = 0;
-                player.isGrounded = true;
-            }
-            // Ceiling Ground Collision
-            else if (player.gravityDir === -1 && player.y <= CEILING_Y) {
-                player.y = CEILING_Y;
-                player.dy = 0;
-                player.isGrounded = true;
-            } else {
-                player.isGrounded = false;
-            }
-            player.rotation += 10 * player.gravityDir;
-
-        } else {
-            // Cube Mode Physics
-            if (holdingJump && player.isGrounded) handleJump();
-
-            player.dy += player.gravity;
-            player.y += player.dy;
-
-            if (player.y >= GROUND_Y - player.size) {
-                player.y = GROUND_Y - player.size;
-                player.dy = 0;
-                player.isGrounded = true;
-                player.rotation = Math.round(player.rotation / 90) * 90;
-            } else {
-                player.isGrounded = false;
-                player.rotation += 8;
-                createParticle();
-            }
+        // Auto-jump if holding key down on floor contact
+        if (holdingJump && player.isGrounded) {
+            handleJump();
         }
 
-        // Progress Percent
+        player.dy += player.gravity;
+        player.y += player.dy;
+
+        // Ground Collision & Dynamic Snap-Rotation
+        if (player.y >= GROUND_Y - player.size) {
+            player.y = GROUND_Y - player.size;
+            player.dy = 0;
+            player.isGrounded = true;
+            // Snap rotation to nearest 90 degrees when landing
+            player.rotation = Math.round(player.rotation / 90) * 90;
+        } else {
+            player.isGrounded = false;
+            player.rotation += 8.5; // RobTop style airborne square flip
+            createParticle();
+        }
+
+        // Progress Calculation
         let progressPercent = Math.min(100, Math.floor((distanceTraveled / LEVEL_LENGTH) * 100));
         progressBar.style.width = progressPercent + '%';
         progressText.innerText = progressPercent + '%';
 
-        if (distanceTraveled >= LEVEL_LENGTH) victory = true;
+        if (distanceTraveled >= LEVEL_LENGTH) {
+            victory = true;
+        }
 
-        // 2. RENDER GRAPHICS
+        // 2. RENDERING SCENE
         bgHue = (bgHue + 0.2) % 360;
-        ctx.fillStyle = `hsl(${bgHue}, 50%, 8%)`;
+        ctx.fillStyle = `hsl(${bgHue}, 60%, 10%)`;
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        // Ceiling Line
-        ctx.fillStyle = '#0a0d18';
-        ctx.fillRect(0, 0, CANVAS_WIDTH, CEILING_Y);
-        ctx.strokeStyle = `hsl(${bgHue}, 100%, 50%)`;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(0, CEILING_Y);
-        ctx.lineTo(CANVAS_WIDTH, CEILING_Y);
-        ctx.stroke();
+        // Draw Animated Grid Lines
+        ctx.strokeStyle = `hsl(${bgHue}, 80%, 25%)`;
+        ctx.lineWidth = 1;
+        let gridOffset = distanceTraveled % 40;
+        for (let x = -gridOffset; x < CANVAS_WIDTH; x += 40) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, GROUND_Y);
+            ctx.stroke();
+        }
 
-        // Floor Line
+        // Draw Floor & Glowing Edge
+        ctx.fillStyle = '#0a0d18';
         ctx.fillRect(0, GROUND_Y, CANVAS_WIDTH, CANVAS_HEIGHT - GROUND_Y);
+        ctx.strokeStyle = `hsl(${bgHue}, 100%, 50%)`;
+        ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.moveTo(0, GROUND_Y);
         ctx.lineTo(CANVAS_WIDTH, GROUND_Y);
         ctx.stroke();
 
-        // Particles
+        // Render Particles
         for (let i = particles.length - 1; i >= 0; i--) {
             let p = particles[i];
             p.x += p.speedX;
@@ -247,123 +196,120 @@ window.addEventListener('load', () => {
             ctx.fillRect(p.x, p.y, p.size, p.size);
         }
 
-        // Render Player Avatar (Cube / Ship / Ball)
+        // Render Player Cube with Dual Color Scheme
         ctx.save();
         ctx.translate(player.x + player.size / 2, player.y + player.size / 2);
         ctx.rotate((player.rotation * Math.PI) / 180);
 
-        if (player.mode === 'ship') {
-            // Draw Rocket Ship Shape
-            ctx.fillStyle = '#ff00ff';
-            ctx.beginPath();
-            ctx.moveTo(20, 0);
-            ctx.lineTo(-15, -15);
-            ctx.lineTo(-10, 0);
-            ctx.lineTo(-15, 15);
-            ctx.closePath();
-            ctx.fill();
-            // Window
-            ctx.fillStyle = '#00ffff';
-            ctx.fillRect(0, -5, 8, 8);
-        } else if (player.mode === 'ball') {
-            // Draw Rolling Ball Shape
-            ctx.fillStyle = '#ff8800';
-            ctx.beginPath();
-            ctx.arc(0, 0, player.size / 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#00ffff';
-            ctx.fillRect(-6, -6, 12, 12);
-        } else {
-            // Standard Cube Shape
-            ctx.fillStyle = '#a6ff00';
-            ctx.fillRect(-player.size / 2, -player.size / 2, player.size, player.size);
-            ctx.fillStyle = '#00ffff';
-            ctx.fillRect(-player.size / 4, -player.size / 4, player.size / 2, player.size / 2);
-        }
+        // Outer Lime Green Body
+        ctx.fillStyle = '#a6ff00';
+        ctx.fillRect(-player.size / 2, -player.size / 2, player.size, player.size);
+
+        // Inner Cyan Accent Box
+        ctx.fillStyle = '#00ffff';
+        ctx.fillRect(-player.size / 4, -player.size / 4, player.size / 2, player.size / 2);
+
+        // GD Icon Eyes
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(-player.size / 3, -player.size / 3, 6, 6);
+        ctx.fillRect(player.size / 3 - 6, -player.size / 3, 6, 6);
         ctx.restore();
 
-        // 3. OBSTACLES & PORTALS
+        // 3. DRAW & CHECK OBSTACLES
         for (let i = activeObstacles.length - 1; i >= 0; i--) {
             let obs = activeObstacles[i];
             let screenX = obs.x - distanceTraveled + player.x;
 
-            if (screenX < -100) continue;
+            if (screenX < -100) continue; // Offscreen left
 
-            // Spikes (Type 1)
+            // Render Spike (Type 1)
             if (obs.type === 1) {
                 ctx.fillStyle = '#ff0055';
                 ctx.beginPath();
                 ctx.moveTo(screenX, GROUND_Y);
-                ctx.lineTo(screenX + 17, GROUND_Y - 35);
-                ctx.lineTo(screenX + 35, GROUND_Y);
+                ctx.lineTo(screenX + 20, GROUND_Y - 40);
+                ctx.lineTo(screenX + 40, GROUND_Y);
                 ctx.closePath();
                 ctx.fill();
 
+                // Hitbox Collision
                 if (
-                    player.x < screenX + 28 &&
-                    player.x + player.size > screenX + 7 &&
-                    player.y + player.size > GROUND_Y - 30
+                    player.x < screenX + 30 &&
+                    player.x + player.size > screenX + 10 &&
+                    player.y + player.size > GROUND_Y - 35
                 ) {
                     gameOver = true;
                 }
-            } 
-            // Portals (Type 10=Ship, 11=Ball, 12=Cube)
-            else if (obs.type >= 10) {
-                let portalColor = '#ff00ff'; // Ship (Magenta)
-                if (obs.type === 11) portalColor = '#ff8800'; // Ball (Orange)
-                if (obs.type === 12) portalColor = '#a6ff00'; // Cube (Green)
+            }
+            // Render Block Platform (Type 2)
+            else if (obs.type === 2) {
+                ctx.fillStyle = '#00ffff';
+                ctx.fillRect(screenX, GROUND_Y - 40, 40, 40);
+                ctx.strokeStyle = '#ffffff';
+                ctx.strokeRect(screenX, GROUND_Y - 40, 40, 40);
 
-                // Render Portal Oval Ring
-                ctx.strokeStyle = portalColor;
-                ctx.lineWidth = 5;
-                ctx.beginPath();
-                ctx.ellipse(screenX, GROUND_Y - 80, 15, 60, 0, 0, Math.PI * 2);
-                ctx.stroke();
-
-                // Touch Portal Check
+                // Collision
                 if (
-                    player.x < screenX + 20 &&
-                    player.x + player.size > screenX - 20
+                    player.x < screenX + 40 &&
+                    player.x + player.size > screenX &&
+                    player.y + player.size > GROUND_Y - 40
                 ) {
-                    if (obs.type === 10 && player.mode !== 'ship') {
-                        player.mode = 'ship';
-                        updateModeUI();
-                    } else if (obs.type === 11 && player.mode !== 'ball') {
-                        player.mode = 'ball';
-                        updateModeUI();
-                    } else if (obs.type === 12 && player.mode !== 'cube') {
-                        player.mode = 'cube';
-                        player.gravityDir = 1;
-                        updateModeUI();
-                    }
+                    gameOver = true;
+                }
+            }
+            // Render Spike sitting on top of Block (Type 3)
+            else if (obs.type === 3) {
+                // Block
+                ctx.fillStyle = '#00ffff';
+                ctx.fillRect(screenX, GROUND_Y - 40, 40, 40);
+                // Spike on top
+                ctx.fillStyle = '#ff0055';
+                ctx.beginPath();
+                ctx.moveTo(screenX, GROUND_Y - 40);
+                ctx.lineTo(screenX + 20, GROUND_Y - 80);
+                ctx.lineTo(screenX + 40, GROUND_Y - 40);
+                ctx.closePath();
+                ctx.fill();
+
+                // Collision
+                if (
+                    player.x < screenX + 35 &&
+                    player.x + player.size > screenX + 5 &&
+                    player.y + player.size > GROUND_Y - 75
+                ) {
+                    gameOver = true;
                 }
             }
         }
 
-        // 4. GAME OVER / VICTORY OVERLAYS
+        // 4. OVERLAY SCREENS
         if (gameOver) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
             ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             ctx.fillStyle = '#ff0055';
-            ctx.font = 'bold 40px sans-serif';
+            ctx.font = 'bold 42px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('CRASHED!', CANVAS_WIDTH / 2, 180);
+            ctx.fillText('LEVEL FAILED!', CANVAS_WIDTH / 2, 180);
             ctx.fillStyle = '#ffffff';
             ctx.font = '18px sans-serif';
             ctx.fillText('Click or Press Space to Retry', CANVAS_WIDTH / 2, 230);
             ctx.textAlign = 'left';
         } else if (victory) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
             ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             ctx.fillStyle = '#00ff88';
-            ctx.font = 'bold 40px sans-serif';
+            ctx.font = 'bold 42px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('LEVEL COMPLETE! 🏆', CANVAS_WIDTH / 2, 180);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '18px sans-serif';
+            ctx.fillText('100% Completed! Click to Play Again', CANVAS_WIDTH / 2, 230);
             ctx.textAlign = 'left';
         } else {
             requestAnimationFrame(gameLoop);
         }
     }
 
+    // Launch Game Loop
     requestAnimationFrame(gameLoop);
 });
