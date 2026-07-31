@@ -4,27 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Geometry Dash Mini-Game</title>
-    <!-- Connects our custom stylesheet -->
+    <!-- Connects our external CSS stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header>
         <h1>Geometry Dash Mini-Game 🎮</h1>
-        <p>Press <strong>SPACEBAR</strong> or <strong>CLICK / TAP</strong> to jump over the spikes!</p>
+        <p>Press <strong>SPACEBAR</strong> or <strong>CLICK / TAP</strong> the box to jump!</p>
     </header>
 
     <main>
         <section class="game-container">
-            <!-- The HTML5 Canvas element serves as our game screen -->
+            <!-- Game Canvas Element -->
             <canvas id="gameCanvas" width="600" height="300"></canvas>
-            
-            <!-- Instructions and restart advice for the player -->
-            <p class="controls-hint">Tip: Time your jumps carefully to get the highest score!</p>
+            <p class="controls-hint">Tip: Time your jumps carefully to avoid the spikes!</p>
         </section>
     </main>
 
-    <!-- Connects our game logic script -->
+    <!-- Connects our JavaScript file AFTER HTML elements are rendered -->
     <script src="script.js"></script>
 </body>
 </html>
