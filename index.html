@@ -2,30 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- Sets the viewport so your website renders nicely on mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geometry Dash Web Edition</title>
+    <title>My Awesome Personal Website</title>
+    <!-- Connects your CSS stylesheet to color and layout the webpage -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <!-- Header section: Houses your main title and navigation/tagline -->
     <header>
-        <h1>GEOMETRY DASH 🎮</h1>
-        <p>Press <strong>SPACEBAR</strong>, <strong>UP ARROW</strong>, or <strong>CLICK</strong> to Jump &amp; Hold to Auto-Jump!</p>
+        <h1>Welcome to My Corner of the Web!</h1>
+        <p>Built from scratch with HTML, CSS, and JavaScript.</p>
     </header>
 
+    <!-- Main content area: Where your primary information lives -->
     <main>
-        <section class="game-wrapper">
-            <!-- Progress Bar displaying level completion percentage -->
-            <div class="progress-bar-container">
-                <div id="progressBar" class="progress-bar-fill"></div>
-                <span id="progressText" class="progress-text">0%</span>
-            </div>
-
-            <!-- Main Canvas Game Area -->
-            <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <section class="card">
+            <h2>About Me</h2>
+            <p>Hi there! I am learning how to code and build custom web applications.</p>
+            <!-- An interactive button connected to our JavaScript file -->
+            <button id="greet-btn">Click Me for a Greeting!</button>
         </section>
     </main>
 
+    <!-- Connects your JavaScript file to add interactive functionality -->
     <script src="script.js"></script>
 </body>
 </html>
