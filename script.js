@@ -31,32 +31,36 @@ startBtn.addEventListener('click', function() {
     clearTimeout(timeoutId);
 
     timeoutId = setTimeout(function() {
-        reactionBox.textContent = "CLICK NOW!";
+        reactionBox.textContent = "PRESS UP ARROW!";
         reactionBox.className = "box-go"; // Turn box GREEN
         startTime = Date.now(); // Record exact timestamp when green appeared
         isWaitingForGreen = false;
     }, randomDelay);
 });
 
-// Function to handle clicks on the reaction box
-reactionBox.addEventListener('click', function() {
-    // Case 1: Player clicked too early (while still red)
-    if (isWaitingForGreen) {
-        clearTimeout(timeoutId); // Cancel the green light timer
-        reactionBox.textContent = "Too early!";
-        reactionBox.className = "box-waiting";
-        gameResult.textContent = "❌ You clicked early! Try again.";
-        startBtn.disabled = false;
-        isWaitingForGreen = false;
-    } 
-    // Case 2: Player clicked when box turned green
-    else if (reactionBox.classList.contains('box-go')) {
-        const endTime = Date.now();
-        const reactionTime = endTime - startTime; // Calculate time in milliseconds
+// Function to handle key presses (Up Arrow)
+document.addEventListener('keydown', function(event) {
+    // Check if the pressed key is the Up Arrow
+    if (event.key === 'ArrowUp') {
         
-        reactionBox.textContent = `${reactionTime} ms!`;
-        reactionBox.className = "box-waiting";
-        gameResult.textContent = `⚡ Speed: ${reactionTime}ms`;
-        startBtn.disabled = false;
+        // Case 1: Player pressed too early (while still red)
+        if (isWaitingForGreen) {
+            clearTimeout(timeoutId); // Cancel the green light timer
+            reactionBox.textContent = "Too early!";
+            reactionBox.className = "box-waiting";
+            gameResult.textContent = "❌ You pressed too early! Try again.";
+            startBtn.disabled = false;
+            isWaitingForGreen = false;
+        } 
+        // Case 2: Player pressed when box turned green
+        else if (reactionBox.classList.contains('box-go')) {
+            const endTime = Date.now();
+            const reactionTime = endTime - startTime; // Calculate time in milliseconds
+            
+            reactionBox.textContent = `${reactionTime} ms!`;
+            reactionBox.className = "box-waiting";
+            gameResult.textContent = `⚡ Speed: ${reactionTime}ms`;
+            startBtn.disabled = false;
+        }
     }
 });
