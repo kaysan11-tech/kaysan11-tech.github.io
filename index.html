@@ -2,31 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Sets the viewport so your website renders nicely on mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Awesome Personal Website</title>
-    <!-- Connects your CSS stylesheet to color and layout the webpage -->
+    <title>My Awesome Website</title>
+    <!-- Linking our CSS stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Header section: Houses your main title and navigation/tagline -->
+    <!-- Header Section -->
     <header>
-        <h1>Welcome to My Corner of the Web!</h1>
-        <p>Built from scratch with HTML, CSS, and JavaScript.</p>
+        <h1 id="main-title">Welcome to My Website!</h1>
+        <p>I'm learning how to build and host my own site on GitHub Pages.</p>
     </header>
 
-    <!-- Main content area: Where your primary information lives -->
+    <!-- Main Content Section -->
     <main>
         <section class="card">
             <h2>About Me</h2>
-            <p>Hi there! I am learning how to code and build custom web applications.</p>
-            <!-- An interactive button connected to our JavaScript file -->
-            <button id="greet-btn">Click Me for a Greeting!</button>
+            <p>This is where you can write a short intro about yourself, your hobbies, or your favorite things.</p>
+            
+            <button id="magic-btn">Click for a Surprise!</button>
+            <p id="message"></p>
         </section>
     </main>
 
-    <!-- Connects your JavaScript file to add interactive functionality -->
+    <!-- NEW: Reaction Minigame Widget pinned to the bottom-right corner -->
+    <aside class="reaction-widget">
+        <h3>⚡ Reaction Test</h3>
+        <p class="game-instructions">Test your speed!</p>
+        <!-- The interactive target box that changes color -->
+        <div id="reaction-box" class="box-waiting">Click "Start" to begin!</div>
+        <button id="start-game-btn">Start Game</button>
+        <p id="game-result"></p>
+    </aside>
+
+    <!-- Linking our JavaScript file -->
     <script src="script.js"></script>
 </body>
 </html>
