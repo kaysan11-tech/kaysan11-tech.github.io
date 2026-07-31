@@ -3,28 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geometry Dash Mini-Game</title>
-    <!-- Connects our custom stylesheet -->
+    <title>Geometry Dash Multi-Gamemode Web Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header>
-        <h1>Geometry Dash Mini-Game 🎮</h1>
-        <p>Press <strong>SPACEBAR</strong> or <strong>CLICK / TAP</strong> to jump over the spikes!</p>
+        <h1>GEOMETRY DASH: ALL GAMEMODES 🎮</h1>
+        <p>Current Gamemode: <strong id="modeDisplay" style="color:#a6ff00;">CUBE</strong></p>
     </header>
 
     <main>
-        <section class="game-container">
-            <!-- The HTML5 Canvas element serves as our game screen -->
-            <canvas id="gameCanvas" width="600" height="300"></canvas>
+        <section class="game-wrapper">
+            <!-- Level Progress Bar -->
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar-fill"></div>
+                <span id="progressText" class="progress-text">0%</span>
+            </div>
+
+            <!-- Game Canvas Screen -->
+            <canvas id="gameCanvas" width="800" height="400"></canvas>
             
-            <!-- Instructions and restart advice for the player -->
-            <p class="controls-hint">Tip: Time your jumps carefully to get the highest score!</p>
+            <p class="controls-hint">
+                <strong>Cube:</strong> Click/Space to Jump | 
+                <strong>Ship:</strong> HOLD to Fly Up | 
+                <strong>Ball:</strong> Click/Space to Flip Gravity
+            </p>
         </section>
     </main>
 
-    <!-- Connects our game logic script -->
     <script src="script.js"></script>
 </body>
 </html>
