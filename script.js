@@ -7,60 +7,56 @@ surpriseButton.addEventListener('click', function() {
 });
 
 // --- NEW: Reaction Time Minigame Logic ---
-const startBtn = document.getElementById('start-game-btn');
 const reactionBox = document.getElementById('reaction-box');
 const gameResult = document.getElementById('game-result');
 
 let startTime;
 let timeoutId;
-let isWaitingForGreen = false;
+let gameState = 'idle'; // Game states: 'idle', 'waiting', 'active'
 
-// Function to start a new round
-startBtn.addEventListener('click', function() {
-    // Reset state and visuals
-    gameResult.textContent = "";
-    reactionBox.textContent = "Wait for GREEN...";
-    reactionBox.className = "box-ready"; // Turn box RED
-    isWaitingForGreen = true;
-    startBtn.disabled = true; // Disable start button while playing
-
-    // Set a random delay between 2 and 5 seconds before turning green
-    const randomDelay = Math.floor(Math.random() * 3000) + 2000;
-
-    // Clear any previous timers if active
-    clearTimeout(timeoutId);
-
-    timeoutId = setTimeout(function() {
-        reactionBox.textContent = "PRESS UP ARROW!";
-        reactionBox.className = "box-go"; // Turn box GREEN
-        startTime = Date.now(); // Record exact timestamp when green appeared
-        isWaitingForGreen = false;
-    }, randomDelay);
-});
-
-// Function to handle key presses (Up Arrow)
+// Single event listener for the Up Arrow key
 document.addEventListener('keydown', function(event) {
-    // Check if the pressed key is the Up Arrow
-    if (event.key === 'ArrowUp') {
+    if (event.key !== 'ArrowUp') return; // Ignore any key that isn't Up Arrow
+
+    // --- STATE 1: Start / Reset a round ---
+    if (gameState === 'idle') {
+        gameState = 'waiting';
         
-        // Case 1: Player pressed too early (while still red)
-        if (isWaitingForGreen) {
-            clearTimeout(timeoutId); // Cancel the green light timer
-            reactionBox.textContent = "Too early!";
-            reactionBox.className = "box-waiting";
-            gameResult.textContent = "❌ You pressed too early! Try again.";
-            startBtn.disabled = false;
-            isWaitingForGreen = false;
-        } 
-        // Case 2: Player pressed when box turned green
-        else if (reactionBox.classList.contains('box-go')) {
-            const endTime = Date.now();
-            const reactionTime = endTime - startTime; // Calculate time in milliseconds
-            
-            reactionBox.textContent = `${reactionTime} ms!`;
-            reactionBox.className = "box-waiting";
-            gameResult.textContent = `⚡ Speed: ${reactionTime}ms`;
-            startBtn.disabled = false;
-        }
+        // Reset visual state
+        gameResult.textContent = "";
+        reactionBox.textContent = "Wait for GREEN...";
+        reactionBox.className = "box-ready"; // Turn box RED
+
+        // Random delay between 2 and 5 seconds
+        const randomDelay = Math.floor(Math.random() * 3000) + 2000;
+
+        clearTimeout(timeoutId);
+
+        timeoutId = setTimeout(function() {
+            reactionBox.textContent = "PRESS UP ARROW!";
+            reactionBox.className = "box-go"; // Turn box GREEN
+            startTime = Date.now();
+            gameState = 'active'; // Ready for user input
+        }, randomDelay);
+    } 
+    
+    // --- STATE 2: Pressed too early ---
+    else if (gameState === 'waiting') {
+        clearTimeout(timeoutId); // Cancel the green light timer
+        reactionBox.textContent = "Too early!";
+        reactionBox.className = "box-waiting";
+        gameResult.textContent = "❌ You pressed too early! Press UP ARROW to try again.";
+        gameState = 'idle'; // Reset state so they can try again
+    } 
+
+    // --- STATE 3: Success! Player hit UP ARROW on GREEN ---
+    else if (gameState === 'active') {
+        const endTime = Date.now();
+        const reactionTime = endTime - startTime; // Calculate speed in ms
+        
+        reactionBox.textContent = `${reactionTime} ms!`;
+        reactionBox.className = "box-waiting";
+        gameResult.textContent = `⚡ Speed: ${reactionTime}ms! Press UP ARROW to play again.`;
+        gameState = 'idle'; // Reset state so they can play again
     }
 });
