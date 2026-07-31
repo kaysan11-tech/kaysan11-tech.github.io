@@ -1,7 +1,7 @@
 /* Page Setup & Styling */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #1a1a2e; /* Dark gaming aesthetic background */
+    background-color: #1a1a2e;
     color: #ffffff;
     margin: 0;
     padding: 0;
@@ -18,11 +18,10 @@ header {
 
 header h1 {
     margin: 0;
-    color: #00fff0; /* Neon cyan title */
+    color: #00fff0;
     text-shadow: 0 0 10px rgba(0, 255, 240, 0.5);
 }
 
-/* Container to center and style the game screen */
 .game-container {
     display: flex;
     flex-direction: column;
@@ -30,10 +29,9 @@ header h1 {
     margin-top: 1rem;
 }
 
-/* Styling the Canvas Game Board */
 #gameCanvas {
-    background-color: #0f3460; /* Dark blue arcade background */
-    border: 4px solid #00fff0; /* Glowing neon border */
+    background-color: #0f3460;
+    border: 4px solid #00fff0;
     border-radius: 8px;
     box-shadow: 0 0 20px rgba(0, 255, 240, 0.3);
     cursor: pointer;
