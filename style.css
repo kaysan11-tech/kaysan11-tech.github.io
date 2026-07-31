@@ -1,46 +1,82 @@
-/* Page Setup & Styling */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #1a1a2e; /* Dark gaming aesthetic background */
+    background-color: #0b0c10;
     color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     min-height: 100vh;
 }
 
 header {
     text-align: center;
-    padding: 1.5rem 1rem;
+    margin-bottom: 10px;
 }
 
 header h1 {
     margin: 0;
-    color: #00fff0; /* Neon cyan title */
-    text-shadow: 0 0 10px rgba(0, 255, 240, 0.5);
+    font-size: 2.2rem;
+    color: #00ffff;
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #0088ff;
+    letter-spacing: 2px;
 }
 
-/* Container to center and style the game screen */
-.game-container {
+header p {
+    color: #cccccc;
+    font-size: 1.1rem;
+    margin-top: 5px;
+}
+
+.game-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 1rem;
 }
 
-/* Styling the Canvas Game Board */
+/* Level Progress Bar */
+.progress-bar-container {
+    width: 800px;
+    height: 18px;
+    background-color: #1f2833;
+    border: 2px solid #00ffff;
+    border-radius: 9px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.progress-bar-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #00ffff, #ff00ff);
+    transition: width 0.1s linear;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px #000;
+}
+
 #gameCanvas {
-    background-color: #0f3460; /* Dark blue arcade background */
-    border: 4px solid #00fff0; /* Glowing neon border */
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 255, 240, 0.3);
+    background-color: #000000;
+    border: 4px solid #00ffff;
+    border-radius: 6px;
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
     cursor: pointer;
 }
 
 .controls-hint {
-    margin-top: 1rem;
-    color: #e94560;
-    font-weight: bold;
+    margin-top: 12px;
+    color: #66fcf1;
+    font-size: 0.95rem;
 }
