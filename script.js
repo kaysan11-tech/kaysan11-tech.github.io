@@ -1,47 +1,50 @@
-// Wait for the web page DOM to fully load before running the game
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // 1. Get the Canvas and Graphics Context
+// Safely run code only when the DOM is ready
+window.addEventListener('load', () => {
     const canvas = document.getElementById('gameCanvas');
+    
+    // Safety check to ensure canvas element exists
+    if (!canvas) {
+        console.error('Error: gameCanvas element not found in HTML!');
+        return;
+    }
+
     const ctx = canvas.getContext('2d');
 
-    // 2. Game Variables & Constants
-    const groundY = 240;          // Y position where the floor starts
-    let score = 0;               // Player score counter
-    let gameOver = false;        // Game state flag
-    let frameCount = 0;          // Tracks loop frames for obstacle spawning
+    // Game Variables
+    const groundY = 240;
+    let score = 0;
+    let gameOver = false;
+    let frameCount = 0;
+    let animationFrameId;
 
-    // 3. Player (Cube) Object Properties
+    // Player Object
     const player = {
         x: 60,
-        y: groundY - 30,         // Start resting on the ground
+        y: groundY - 30,
         size: 30,
-        dy: 0,                   // Vertical velocity (speed of movement up/down)
-        gravity: 0.8,            // Pulls player back down
-        jumpStrength: -12,       // Upward impulse speed
+        dy: 0,
+        gravity: 0.8,
+        jumpStrength: -12,
         isJumping: false,
-        rotation: 0              // Rotation angle for classic Geometry Dash flips
+        rotation: 0
     };
 
-    // 4. Obstacles Array
     let obstacles = [];
 
-    // 5. Jump Functionality
+    // Jump Handler
     function jump() {
-        // If the game is over, restart the game on press
         if (gameOver) {
             resetGame();
             return;
         }
 
-        // Only jump if player is currently on the ground
         if (!player.isJumping) {
             player.dy = player.jumpStrength;
             player.isJumping = true;
         }
     }
 
-    // Reset game state back to starting defaults
+    // Reset Game Function
     function resetGame() {
         score = 0;
         gameOver = false;
@@ -51,28 +54,32 @@ document.addEventListener('DOMContentLoaded', () => {
         player.isJumping = false;
         player.rotation = 0;
         frameCount = 0;
-        requestAnimationFrame(gameLoop); // Restart loop
+        
+        // Cancel existing loop before restarting
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+        }
+        gameLoop();
     }
 
-    // 6. Listeners for Keyboard and Click inputs
+    // Keyboard & Mouse Listeners
     window.addEventListener('keydown', (e) => {
         if (e.code === 'Space' || e.code === 'ArrowUp') {
+            e.preventDefault(); // Prevents page scrolling down when pressing Spacebar
             jump();
         }
     });
 
-    canvas.addEventListener('click', () => {
-        jump();
-    });
+    canvas.addEventListener('click', jump);
 
-    // 7. Main Game Loop (runs ~60 times per second)
+    // Main Game Loop
     function gameLoop() {
-        if (gameOver) return; // Stop loop if player loses
+        if (gameOver) return;
 
-        // Clear the canvas on every frame
+        // Clear canvas screen
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // --- DRAW GROUND ---
+        // Draw Ground
         ctx.fillStyle = '#16213e';
         ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
         ctx.strokeStyle = '#00fff0';
@@ -82,36 +89,33 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineTo(canvas.width, groundY);
         ctx.stroke();
 
-        // --- UPDATE & DRAW PLAYER ---
-        player.dy += player.gravity; // Apply gravity
-        player.y += player.dy;       // Move player vertically
+        // Update Physics
+        player.dy += player.gravity;
+        player.y += player.dy;
 
-        // Floor collision check
+        // Floor collision
         if (player.y >= groundY - player.size) {
             player.y = groundY - player.size;
             player.isJumping = false;
             player.dy = 0;
-            player.rotation = 0; // Snap upright on landing
+            player.rotation = 0;
         } else {
-            // Spin player cube while airborne!
-            player.rotation += 8;
+            player.rotation += 8; // Spin during jump
         }
 
-        // Render player cube with rotation
+        // Render Player
         ctx.save();
         ctx.translate(player.x + player.size / 2, player.y + player.size / 2);
         ctx.rotate((player.rotation * Math.PI) / 180);
-        ctx.fillStyle = '#ff2e63'; // Bright neon pink cube
+        ctx.fillStyle = '#ff2e63';
         ctx.fillRect(-player.size / 2, -player.size / 2, player.size, player.size);
-        
-        // Inner cube detail (Geometry Dash style)
         ctx.fillStyle = '#00fff0';
         ctx.fillRect(-player.size / 4, -player.size / 4, player.size / 2, player.size / 2);
         ctx.restore();
 
-        // --- SPAWN & MOVE OBSTACLES (SPIKES) ---
+        // Obstacles & Collision Check
         frameCount++;
-        if (frameCount % 90 === 0) { // Spawn a new spike roughly every 1.5 seconds
+        if (frameCount % 90 === 0) {
             obstacles.push({
                 x: canvas.width,
                 width: 25,
@@ -121,10 +125,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (let i = 0; i < obstacles.length; i++) {
             let obs = obstacles[i];
-            obs.x -= 6; // Speed spike moves to the left
+            obs.x -= 6;
 
-            // Draw Spike (Triangle shape)
-            ctx.fillStyle = '#f9ed69'; // Yellow spike color
+            // Draw Spike
+            ctx.fillStyle = '#f9ed69';
             ctx.beginPath();
             ctx.moveTo(obs.x, groundY);
             ctx.lineTo(obs.x + obs.width / 2, groundY - obs.height);
@@ -132,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.closePath();
             ctx.fill();
 
-            // Collision Detection (Check if player cube touches spike)
+            // Collision Detection
             if (
                 player.x < obs.x + obs.width &&
                 player.x + player.size > obs.x &&
@@ -142,17 +146,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Remove obstacles that have moved off the left side of the screen
+        // Score tracking
         if (obstacles.length > 0 && obstacles[0].x < -30) {
             obstacles.shift();
-            score += 10; // Gain score for surviving spikes!
+            score += 10;
         }
 
-        // --- DRAW SCORE & GAME OVER TEXT ---
+        // Draw Score UI
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 20px sans-serif';
         ctx.fillText(`Score: ${score}`, 20, 35);
 
+        // Game Over Screen
         if (gameOver) {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -166,13 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.font = '18px sans-serif';
             ctx.fillText(`Final Score: ${score}`, canvas.width / 2, 170);
             ctx.fillText('Press Space or Click to Play Again', canvas.width / 2, 210);
-            ctx.textAlign = 'left'; // Reset alignment
+            ctx.textAlign = 'left';
         } else {
-            // Request next frame in the animation loop
-            requestAnimationFrame(gameLoop);
+            animationFrameId = requestAnimationFrame(gameLoop);
         }
     }
 
-    // Start the game loop for the first time
-    requestAnimationFrame(gameLoop);
+    // Launch game
+    gameLoop();
 });
